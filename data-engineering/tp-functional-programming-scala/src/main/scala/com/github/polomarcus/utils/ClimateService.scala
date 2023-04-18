@@ -16,7 +16,10 @@ object ClimateService {
    * @param description "my awesome sentence contains a key word like climate change"
    * @return Boolean True
    */
-  def isClimateRelated(description: String): Boolean = ???
+  def isClimateRelated(description: String): Boolean = {
+    val keywords = List("global warming", "IPCC", "climate change")
+    keywords.exists(keyword => description.toLowerCase.contains(keyword.toLowerCase))
+  }
 
   /**
    * parse a list of raw data and transport it with type into a list of CO2Record
@@ -26,8 +29,10 @@ object ClimateService {
    * you can access to Tuple with myTuple._1, myTuple._2, myTuple._3
    */
   def parseRawData(list: List[(Int, Int, Double)]) : List[Option[CO2Record]] = {
-    list.map { record => ??? }
-    ???
+    list.map { record =>
+      if (CO2Record(record._1, record._2, record._3).isValidPpmValue) Some(CO2Record(record._1, record._2, record._3))
+      else None
+    }
   }
 
   /**
@@ -36,16 +41,36 @@ object ClimateService {
    * @param list
    * @return a list
    */
-  def filterDecemberData(list: List[Option[CO2Record]]) : List[CO2Record] = ???
+  def filterDecemberData(list: List[Option[CO2Record]]) : List[CO2Record] = {
+    list.flatten.filterNot(_.month == 12)
+  }
 
 
   /**
    * **Tips**: look at the read me to find some tips for this function
    */
-  def getMinMax(list: List[CO2Record]) : (Double, Double) = ???
+  def getMinMax(list: List[CO2Record]) : (Double, Double) = {
+    if (list.isEmpty) {
+      throw new IllegalArgumentException("List must not be empty")
+    } else {
+      (list.minBy(_.ppm).ppm, list.maxBy(_.ppm).ppm)
+    }
 
-  def getMinMaxByYear(list: List[CO2Record], year: Int) : (Double, Double) = ???
+  }
 
+  def getMinMaxByYear(list: List[CO2Record], year: Int) : (Double, Double) = {
+    val yearList = list.filter(_.year == year)
+    if (yearList.isEmpty) {
+      throw new IllegalArgumentException(s"No data available for year $year")
+    } else {
+      getMinMax(yearList)
+    }
+  }
+
+  def getDiffMinMax(list: List[CO2Record]): Double = {
+    val (min, max) = getMinMax(list)
+    max - min
+  }
   /**
    * use this function side src/main/scala/com/polomarcus/main/Main (with sbt run)
    * display every item on the list using the CO2Record's "show" function
