@@ -102,5 +102,20 @@ class ClimateServiceTest extends AnyFunSuite {
     val tolerance = 0.001
     assert(math.abs(actual - expected) < tolerance)
   }
+
+  test("estimateCO2LevelsFor2050") {
+    val input = List(
+      Some(CO2Record(2012, 12, 400.0)),
+      Some(CO2Record(2013, 11, 390.0)),
+      Some(CO2Record(2014, 12, 410.0)),
+      Some(CO2Record(2014, 10, 380.0)),
+      Some(CO2Record(2016, 12, 420.0)),
+      Some(CO2Record(2016, 12, 430.0)),
+      Some(CO2Record(2018, 12, 440.0))
+    )
+    val estimatedLevel = ClimateService.estimateCO2LevelsFor2050(input)
+    assert(estimatedLevel > 420.0)
+
+  }
 }
 
